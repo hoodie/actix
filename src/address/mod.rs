@@ -1,5 +1,8 @@
 use std::hash::{Hash, Hasher};
-use std::{error, fmt, sync::Arc};
+use std::{
+    error, fmt,
+    sync::{Arc, Weak},
+};
 
 use derive_more::Display;
 
@@ -259,6 +262,13 @@ where
     pub fn connected(&self) -> bool {
         self.tx.connected()
     }
+
+    /// Returns a downgraded `WeakAddr`.
+    pub fn downgrade(&self) -> WeakRecipient<M> {
+        WeakRecipient {
+            wtx: Arc::downgrade(&self.tx),
+        }
+    }
 }
 
 impl<A: Actor, M: Message + Send + 'static> Into<Recipient<M>> for Addr<A>
@@ -318,6 +328,24 @@ where
 {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "Recipient {{ /* omitted */ }}")
+    }
+}
+
+pub struct WeakRecipient<M: Message>
+where
+    M: Message + Send,
+    M::Result: Send,
+{
+    wtx: Weak<dyn Sender<M>>,
+}
+
+impl<M> WeakRecipient<M>
+where
+    M: Message + Send,
+    M::Result: Send,
+{
+    pub fn upgrade(self) -> Option<Recipient<M>> {
+        Weak::upgrade(&self.wtx).map(|tx| Recipient { tx })
     }
 }
 
