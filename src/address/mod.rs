@@ -1,5 +1,5 @@
 use std::hash::{Hash, Hasher};
-use std::{error, fmt};
+use std::{error, fmt, sync::Arc};
 
 use derive_more::Display;
 
@@ -212,7 +212,7 @@ where
     M: Message + Send,
     M::Result: Send,
 {
-    tx: Box<dyn Sender<M>>,
+    tx: Arc<dyn Sender<M>>,
 }
 
 impl<M> Recipient<M>
@@ -221,7 +221,7 @@ where
     M::Result: Send,
 {
     /// Creates a new recipient.
-    pub(crate) fn new(tx: Box<dyn Sender<M>>) -> Recipient<M> {
+    pub(crate) fn new(tx: Arc<dyn Sender<M>>) -> Recipient<M> {
         Recipient { tx }
     }
 
@@ -268,7 +268,7 @@ where
     A::Context: ToEnvelope<A, M>,
 {
     fn into(self) -> Recipient<M> {
-        Recipient::new(Box::new(self.tx))
+        Recipient::new(Arc::new(self.tx))
     }
 }
 
@@ -279,7 +279,7 @@ where
 {
     fn clone(&self) -> Recipient<M> {
         Recipient {
-            tx: self.tx.boxed(),
+            tx: self.tx.arced(),
         }
     }
 }

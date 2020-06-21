@@ -31,6 +31,7 @@ where
     fn send(&self, msg: M) -> Result<Receiver<M::Result>, SendError<M>>;
 
     fn boxed(&self) -> Box<dyn Sender<M>>;
+    fn arced(&self) -> Arc<dyn Sender<M>>;
 
     fn hash(&self) -> usize;
 
@@ -459,6 +460,9 @@ where
     }
     fn boxed(&self) -> Box<dyn Sender<M>> {
         Box::new(self.clone())
+    }
+    fn arced(&self) -> Arc<dyn Sender<M>> {
+        Arc::new(self.clone())
     }
 
     fn hash(&self) -> usize {
