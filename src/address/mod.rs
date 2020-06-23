@@ -331,6 +331,7 @@ where
     }
 }
 
+/// A weakly referenced counterpart to `Recipient<M>`
 pub struct WeakRecipient<M: Message>
 where
     M: Message + Send,
