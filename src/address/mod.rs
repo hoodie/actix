@@ -215,7 +215,7 @@ where
     M: Message + Send,
     M::Result: Send,
 {
-    tx: Arc<dyn Sender<M>>,
+    tx: Arc<dyn Sender<M> + Sync>,
 }
 
 impl<M> Recipient<M>
@@ -224,7 +224,7 @@ where
     M::Result: Send,
 {
     /// Creates a new recipient.
-    pub(crate) fn new(tx: Arc<dyn Sender<M>>) -> Recipient<M> {
+    pub(crate) fn new(tx: Arc<dyn Sender<M> + Sync>) -> Recipient<M> {
         Recipient { tx }
     }
 
@@ -337,7 +337,7 @@ where
     M: Message + Send,
     M::Result: Send,
 {
-    wtx: Weak<dyn Sender<M>>,
+    wtx: Weak<dyn Sender<M> + Sync>,
 }
 
 impl<M> WeakRecipient<M>
